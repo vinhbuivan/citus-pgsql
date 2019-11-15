@@ -1,0 +1,38 @@
+version: '3.7'
+services:
+  master:
+    image: 'citusdata/citus:8.3.2'
+    ports: ["${MASTER_EXTERNAL_PORT:-5432}:5432"]
+    labels: ['com.citusdata.role=Master', 'com.docker.compose.project=citus']
+    networks:
+      - postgis_dist
+    volumes:
+      - master:/var/lib/postgresql/data
+  manager:
+    image: 'citusdata/membership-manager:0.2.0'
+    volumes: ['/var/run/docker.sock:/var/run/docker.sock']
+    labels: ['com.citusdata.role=Manager', 'com.docker.compose.project=citus']
+    networks:
+      - postgis_dist
+    depends_on:
+      - master
+    deploy:
+      mode: global
+  worker:
+    image: 'citusdata/citus:8.3.2'
+    labels: ['com.citusdata.role=Worker', 'com.docker.compose.project=citus']
+    depends_on:
+      - manager
+    deploy:
+      replicas: 3
+    networks:
+      - postgis_dist
+    volumes:
+      - worker:/var/lib/postgresql/data
+
+volumes:
+  master:
+  worker:
+networks:
+  postgis_dist:
+    driver: overlay
