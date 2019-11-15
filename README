@@ -1,0 +1,6 @@
+Citus PGSQL run in cluster mode with plugin citusdata (https://www.citusdata.com/).
+I've made some adjustment about resynchonorize PSQL.
+Before deploy the stack, remake the image.
+docker build -t citusdata/membership-manager:0.2.0 . 
+
+docker stack deploy -c docker-compose.yml citus
